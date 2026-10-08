@@ -8,7 +8,7 @@ from src.operations.collect import CollectOptions, CollectScans
 from src.operations.select_scans import SelectScans
 from src.utils import io as cxio
 from src.utils.auth import AuthError, AuthManager
-from src.utils.config import Config
+from src.utils.config import Config, ConfigError
 from src.utils.http import ApiError, HttpClient
 from src.utils.progress import Progress
 
@@ -18,6 +18,7 @@ DETAIL_LIMIT = 50
 def parse_args(argv=None):
     p = argparse.ArgumentParser(description="Read-only CxOne scan statistics / LOC report")
     a = p.add_argument_group("auth (or CXONE_* env / .env)")
+    a.add_argument("--env-file", metavar="PATH", help="Load CXONE_* settings from this file instead of .env")
     a.add_argument("--base-url", help="Region base URL, e.g. https://eu.ast.checkmarx.net")
     a.add_argument("--tenant-name", help="Tenant name")
     a.add_argument("--api-key", help="API key (refresh token)")
@@ -70,7 +71,10 @@ def main(argv=None):
     args = parse_args(argv)
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(errors="replace")
-    config = Config.from_args(args).resolve()
+    try:
+        config = Config.from_args(args).resolve()
+    except ConfigError as e:
+        return fail(str(e))
     ok, err = config.validate()
     if not ok:
         return fail(f"configuration: {err}")

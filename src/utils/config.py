@@ -56,8 +56,16 @@ class Config:
         self.debug = False
 
     @classmethod
-    def from_env(cls):
-        load_dotenv()
+    def from_env(cls, env_file=None):
+        """Load `env_file` (explicit; overrides existing variables) or the default .env lookup."""
+        env_file = env_file or os.getenv("CXONE_ENV_FILE")
+        if env_file:
+            path = os.path.abspath(os.path.normpath(env_file))
+            if not os.path.isfile(path):
+                raise ConfigError(f"env file not found: {env_file}")
+            load_dotenv(path, override=True)
+        else:
+            load_dotenv()
         config = cls()
         config.base_url = os.getenv("CXONE_BASE_URL") or None
         config.tenant_name = os.getenv("CXONE_TENANT") or None
@@ -69,7 +77,7 @@ class Config:
     @classmethod
     def from_args(cls, args, env_config=None):
         """Merge per field: CLI arg if given, else the environment value."""
-        env = env_config or cls.from_env()
+        env = env_config or cls.from_env(getattr(args, "env_file", None))
         config = cls()
         config.base_url = getattr(args, "base_url", None) or env.base_url
         config.tenant_name = getattr(args, "tenant_name", None) or env.tenant_name

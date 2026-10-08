@@ -24,7 +24,7 @@ python -m pytest
 | `CXONE_IAM_URL` | `--iam-url` | Override for single-tenant or custom domains. Default: the `ast` host label becomes `iam`. |
 | `CXONE_DEBUG` | `--debug` | Logs each request (method, path, status, ms) to stderr. Never logs tokens. |
 
-A `.env` file is loaded. Each field is merged: the CLI argument wins, otherwise the environment value is used. The resolved tenant and base URL are always printed to stderr.
+A `.env` file is loaded by default. Use `--env-file PATH` (or `CXONE_ENV_FILE`) to load a different file, e.g. `python main.py --env-file .env-prod --all-projects`; values in an explicit file override variables already set in the shell. Each field is merged: the CLI argument wins, otherwise the environment value is used. The resolved tenant and base URL are always printed to stderr.
 
 ## Usage
 
